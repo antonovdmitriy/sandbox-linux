@@ -1,0 +1,106 @@
+---
+- name: dev preparation
+  hosts: localhost
+  connection: local
+  # vars_files:
+  #   - secret.yml
+  tasks:
+  - name: install packages
+    package:
+      name: 
+        - vim
+        - mc
+        - git
+        # - openjdk-17-jre-headless
+        - maven
+        - gradle
+        # - virtualbox
+        # - vagrant
+        - docker.io
+      state: present
+  - name: Install Intelij Idea, Visual Studio Code using snap repo
+    snap:
+      name: 
+        - intellij-idea-community
+        - code
+      classic: true
+
+  # - name: add user antonov
+  #   user:
+  #     name: antonov
+  #     shell: /bin/bash
+  # - name: Create directory if it does not exist
+  #   ansible.builtin.file:
+  #     path: "{{ item }}"
+  #     owner: antonov
+  #     group: antonov
+  #     state: directory
+  #   loop:
+  #     - /home/antonov/.ssh
+  #     - /home/antonov/CODE
+  #     - /home/antonov/NOTES
+  #     - /home/antonov/NOTES/it-notes
+  # - name: Write private key
+  #   ansible.builtin.copy:
+  #     content: "{{ github_private_key }}"
+  #     dest: /home/antonov/.ssh/id_rsa
+  #     owner: antonov
+  #     force: false
+  #     group: antonov
+  #     mode: '0600'
+  # - name: Write public key
+  #   ansible.builtin.copy:
+  #     content: "{{ github_public_key }}"
+  #     dest: /home/antonov/.ssh/id_rsa.pub
+  #     owner: antonov
+  #     group: antonov
+  #     force: false
+  #     mode: '0600'
+
+  # - name: Add ssh agent line to sudoers
+  #   lineinfile: 
+  #     dest: /etc/sudoers
+  #     state: present
+  #     regexp: SSH_AUTH_SOCK
+  #     line: Defaults env_keep += "SSH_AUTH_SOCK"
+
+  # - name: start the ssh-agent
+  #   become_user: antonov
+  #   become: true
+  #   become_method: su
+  #   shell: ssh-agent bash
+  #   args:
+  #     executable: /bin/bash
+
+  # - name: add the ssh key to the ssh-agent
+  #   become_user: antonov
+  #   become: true
+  #   become_method: su
+  #   expect:
+  #     command: ssh-add /home/antonov/.ssh/id_rsa
+  #     responses:
+  #       Enter passphrase for /home/antonov/.ssh/id_rsa:  "614331"
+
+
+  # - name: Git checkout
+  #   become_user: antonov
+  #   become: true
+  #   become_method: su
+  #   ansible.builtin.git:
+  #     repo: git@github.com:antonovdmitriy/it-notes.git
+  #     dest: /home/antonov/NOTES/it-notes
+  #     accept_hostkey: true
+
+  ## продумать процедуру доступа пользователем в расшаренную папку. Пока не получается применить группу vboxsf. 
+  ## замонтировать под пользователем    
+  ## запускать не из под рута изначально. Если нужно брать привелегии. Иначе проблемы с ssh агентом и паролем к ключу
+
+      
+  # create two folders NOTES and CODE. Then install private key and public key to git. Then add email and user name to git. Then download projects from github to folder respectively. 
+  # поставить vs code
+  # поставить idea
+  # поставить google drive
+  # поставить keepass
+  # поставить oracle sql developer
+  # поставить todo list
+  
