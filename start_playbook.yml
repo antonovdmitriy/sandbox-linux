@@ -1,22 +1,28 @@
 ---
+
 - name: dev preparation
   hosts: localhost
   connection: local
-  # vars_files:
-  #   - secret.yml
   tasks:
+  - name: Mount VM Ware shared folder
+    mount:
+      path: /mnt/hgfs
+      src: vmhgfs-fuse
+      fstype: fuse
+      opts: defaults,allow_other
+      state: present
+# TODO to write expression to check if you use vm ware agent
   - name: install packages
     package:
       name: 
         - vim
         - mc
         - git
-        # - openjdk-17-jre-headless
+        - openjdk-17-jre-headless
         - maven
         - gradle
-        # - virtualbox
-        # - vagrant
         - docker.io
+        - docker-compose
       state: present
   - name: Install Intelij Idea, Visual Studio Code using snap repo
     snap:
@@ -25,80 +31,124 @@
         - code
       classic: true
 
-  # - name: add user antonov
-  #   user:
-  #     name: antonov
-  #     shell: /bin/bash
-  # - name: Create directory if it does not exist
-  #   ansible.builtin.file:
-  #     path: "{{ item }}"
+  # - name: Extract oracle sql developer distr
+  #   unarchive:
+  #     dest: /opt
+  #     src: /mnt/hgfs/soft-linux/sqldeveloper-22.2.1.234.1810-no-jre.zip
   #     owner: antonov
   #     group: antonov
-  #     state: directory
-  #   loop:
-  #     - /home/antonov/.ssh
-  #     - /home/antonov/CODE
-  #     - /home/antonov/NOTES
-  #     - /home/antonov/NOTES/it-notes
-  # - name: Write private key
-  #   ansible.builtin.copy:
-  #     content: "{{ github_private_key }}"
-  #     dest: /home/antonov/.ssh/id_rsa
-  #     owner: antonov
-  #     force: false
-  #     group: antonov
-  #     mode: '0600'
-  # - name: Write public key
-  #   ansible.builtin.copy:
-  #     content: "{{ github_public_key }}"
-  #     dest: /home/antonov/.ssh/id_rsa.pub
-  #     owner: antonov
-  #     group: antonov
-  #     force: false
-  #     mode: '0600'
 
-  # - name: Add ssh agent line to sudoers
-  #   lineinfile: 
-  #     dest: /etc/sudoers
-  #     state: present
-  #     regexp: SSH_AUTH_SOCK
-  #     line: Defaults env_keep += "SSH_AUTH_SOCK"
+  - name: add user antonov
+    user:
+      name: antonov
+      shell: /bin/bash
+  - name: Create directory if it does not exist
+    ansible.builtin.file:
+      path: "{{ item }}"
+      owner: antonov
+      group: antonov
+      state: directory
+    loop:
+      - /home/antonov/.ssh
+      - /home/ansible/.ssh
+      - /home/antonov/CODE
+      - /home/antonov/CODE/learning-aws-lambda
+      - /home/antonov/CODE/learning-aws-lambda-springboot
+      - /home/antonov/CODE/bridle
+      - /home/antonov/CODE/earthquake
+      - /home/antonov/CODE/sandbox-linux
+      - /home/antonov/NOTES
+      - /home/antonov/NOTES/it-notes
+  - name: Write private key for main user
+    copy:
+      content: "{{ github_private_key }}"
+      dest: /home/antonov/.ssh/id_rsa
+      owner: antonov
+      force: false
+      group: antonov
+      mode: '0600'
+  - name: Write private key for ansible user
+    copy:
+      content: "{{ github_private_key }}"
+      dest: /home/ansible/.ssh/id_rsa
+      force: false
+      mode: '0600'      
+  - name: Write public key for main user
+    ansible.builtin.copy:
+      content: "{{ github_public_key }}"
+      dest: /home/antonov/.ssh/id_rsa.pub
+      force: false
+      mode: '0600'
+  - name: Write public key for ansible user
+    ansible.builtin.copy:
+      content: "{{ github_public_key }}"
+      dest: /home/ansible/.ssh/id_rsa.pub
+      owner: antonov
+      group: antonov
+      force: false
+      mode: '0600'
 
-  # - name: start the ssh-agent
-  #   become_user: antonov
-  #   become: true
-  #   become_method: su
-  #   shell: ssh-agent bash
-  #   args:
-  #     executable: /bin/bash
+  - name: Add ssh agent line to sudoers
+    lineinfile: 
+      dest: /etc/sudoers
+      state: present
+      regexp: SSH_AUTH_SOCK
+      line: Defaults env_keep += "SSH_AUTH_SOCK"
 
-  # - name: add the ssh key to the ssh-agent
-  #   become_user: antonov
-  #   become: true
-  #   become_method: su
-  #   expect:
-  #     command: ssh-add /home/antonov/.ssh/id_rsa
-  #     responses:
-  #       Enter passphrase for /home/antonov/.ssh/id_rsa:  "614331"
+  - name: start the ssh-agent
+    shell: ssh-agent -s
+    args:
+      executable: /bin/bash
+
+  - name: add the ssh key to the ssh-agent
+    expect:
+      command: ssh-add /home/antonov/.ssh/id_rsa
+      responses:
+        Enter passphrase for /home/antonov/.ssh/id_rsa:  "{{ github_password_from_key }}"
+
+  - name: "git editor"
+    git_config:
+      name: core.editor
+      scope: system
+      value: "vim"
+
+  - name: "git email"
+    git_config:
+      name: user.email
+      scope: system
+      value: "antonov.buscorr@gmail.com"
+
+  - name: "git user name"
+    git_config:
+      name: user.name
+      scope: system
+      value: "Dmitrii_Antonov"
+
+  - name: Git checkout it-notes
+    become_user: antonov
+    become: true
+    git:
+      repo: git@github.com:antonovdmitriy/it-notes.git
+      dest: /home/antonov/NOTES/it-notes
+      accept_hostkey: true
 
 
-  # - name: Git checkout
-  #   become_user: antonov
-  #   become: true
-  #   become_method: su
-  #   ansible.builtin.git:
-  #     repo: git@github.com:antonovdmitriy/it-notes.git
-  #     dest: /home/antonov/NOTES/it-notes
-  #     accept_hostkey: true
-
-  ## продумать процедуру доступа пользователем в расшаренную папку. Пока не получается применить группу vboxsf. 
-  ## замонтировать под пользователем    
-  ## запускать не из под рута изначально. Если нужно брать привелегии. Иначе проблемы с ssh агентом и паролем к ключу
+  - name: Git checkout code
+    become_user: antonov
+    become: true
+    git:
+      repo: git@github.com:antonovdmitriy/{{ item }}.git
+      dest: /home/antonov/CODE/{{ item }}
+      accept_hostkey: true
+    with_items:
+      - learning-aws-lambda
+      - learning-aws-lambda-springboot
+      - sandbox-linux
+      - bridle
+      - earthquake
 
       
   # create two folders NOTES and CODE. Then install private key and public key to git. Then add email and user name to git. Then download projects from github to folder respectively. 
-  # поставить vs code
-  # поставить idea
   # поставить google drive
   # поставить keepass
   # поставить oracle sql developer
