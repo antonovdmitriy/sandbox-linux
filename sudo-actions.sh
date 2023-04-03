@@ -14,6 +14,9 @@ echo "ansible ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 # usermod -aG vboxsf ansible
 apt update
 apt -y upgrade
+apt autoremove
+apt autoclean
+journalctl --vacuum-time=1d
 ## install ansible
 apt -y install ansible
 ## put default ansible config to ansible home directory
