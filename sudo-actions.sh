@@ -1,5 +1,10 @@
 #!/bin/bash
 
+ls -l
+
+if [ -z $1 ]; then echo $1 argument for playbook is empty; exit -1; fi
+if [ ! -f $1 ]; then echo $1 playbook does not exist; exit -2; fi
+
 ## create technical ansible user
 useradd  -m ansible -s /bin/bash
 ## grant ansible user get sudo without password
@@ -22,7 +27,7 @@ EOF
 change gnome terminal font size
 
 # copy start playbook from current directory to ansible home directory
-cp ./start_playbook.yml /home/ansible/start_playbook.yml
+cp $1 /home/ansible/start_playbook.yml
 ## change owner to ansible
 chown ansible:ansible /home/ansible/start_playbook.yml
 ## run start playbok as ansible user
