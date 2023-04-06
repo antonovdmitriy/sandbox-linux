@@ -5,7 +5,7 @@
   connection: local
   tasks:
   - name: Mount VM Ware shared folder
-    when: ansible_virtualization_type == 'VMWare'
+    when: ansible_facts['virtualization_type'] == 'VMware'
     mount:
       path: /mnt/hgfs
       src: vmhgfs-fuse
