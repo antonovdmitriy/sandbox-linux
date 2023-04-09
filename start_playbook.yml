@@ -3,6 +3,9 @@
 - name: dev preparation
   hosts: localhost
   connection: local
+  vars:
+    bucket_name: sql-developer-for-personal-use  
+    filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
   tasks:
   - name: Mount VM Ware shared folder
     when: ansible_facts['virtualization_type'] == 'VMware'
@@ -15,26 +18,26 @@
   - name: install packages
     package:
       name: 
-        - vim
-        - mc
-        - git
-        - openjdk-17-jdk-headless
-        - maven
-        - gradle
-        - docker.io
-        - docker-compose
+        # - vim
+        # - mc
+        # - git
+        # - maven
+        # - gradle
+        # - docker.io
+        # - docker-compose
+         - openjdk-17-jdk
       state: present
-  - name: Install Intelij Idea, Visual Studio Code using snap repo
-    snap:
-      name: 
-        - intellij-idea-community
-        - code
-      classic: true
+  # - name: Install Intelij Idea, Visual Studio Code using snap repo
+  #   snap:
+  #     name: 
+  #       - intellij-idea-community
+  #       - code
+  #     classic: true
 
-  - name: add user antonov
-    user:
-      name: antonov
-      shell: /bin/bash
+  # - name: add user antonov
+  #   user:
+  #     name: antonov
+  #     shell: /bin/bash
   - name: Create directory if it does not exist
     ansible.builtin.file:
       path: "{{ item }}"
@@ -42,116 +45,155 @@
       group: antonov
       state: directory
     loop:
-      - /home/antonov/.ssh
-      - /home/ansible/.ssh
-      - /home/antonov/CODE
-      - /home/antonov/CODE/learning-aws-lambda
-      - /home/antonov/CODE/learning-aws-lambda-springboot
-      - /home/antonov/CODE/bridle
-      - /home/antonov/CODE/earthquake
-      - /home/antonov/CODE/sandbox-linux
-      - /home/antonov/NOTES
-      - /home/antonov/NOTES/it-notes
-  - name: Write private key for main user
-    copy:
-      content: "{{ github_private_key }}"
-      dest: /home/antonov/.ssh/id_rsa
-      owner: antonov
-      force: false
-      group: antonov
-      mode: '0600'
-  - name: Write private key for ansible user
-    copy:
-      content: "{{ github_private_key }}"
-      dest: /home/ansible/.ssh/id_rsa
-      force: false
-      mode: '0600'      
-  - name: Write public key for main user
-    ansible.builtin.copy:
-      content: "{{ github_public_key }}"
-      dest: /home/antonov/.ssh/id_rsa.pub
-      force: false
-      mode: '0600'
-  - name: Write public key for ansible user
-    ansible.builtin.copy:
-      content: "{{ github_public_key }}"
-      dest: /home/ansible/.ssh/id_rsa.pub
-      owner: antonov
-      group: antonov
-      force: false
-      mode: '0600'
+      # - /home/antonov/.ssh
+      # - /home/ansible/.ssh
+      # - /home/antonov/CODE
+      # - /home/antonov/CODE/learning-aws-lambda
+      # - /home/antonov/CODE/learning-aws-lambda-springboot
+      # - /home/antonov/CODE/bridle
+      # - /home/antonov/CODE/earthquake
+      # - /home/antonov/CODE/sandbox-linux
+      # - /home/antonov/NOTES
+      # - /home/antonov/NOTES/it-notes
+      - /opt/oracle-sql-developer
+  # - name: Write private key for main user
+  #   copy:
+  #     content: "{{ github_private_key }}"
+  #     dest: /home/antonov/.ssh/id_rsa
+  #     owner: antonov
+  #     force: false
+  #     group: antonov
+  #     mode: '0600'
+  # - name: Write private key for ansible user
+  #   copy:
+  #     content: "{{ github_private_key }}"
+  #     dest: /home/ansible/.ssh/id_rsa
+  #     force: false
+  #     mode: '0600'      
+  # - name: Write public key for main user
+  #   ansible.builtin.copy:
+  #     content: "{{ github_public_key }}"
+  #     dest: /home/antonov/.ssh/id_rsa.pub
+  #     force: false
+  #     mode: '0600'
+  # - name: Write public key for ansible user
+  #   ansible.builtin.copy:
+  #     content: "{{ github_public_key }}"
+  #     dest: /home/ansible/.ssh/id_rsa.pub
+  #     owner: antonov
+  #     group: antonov
+  #     force: false
+  #     mode: '0600'
 
-  - name: start the ssh-agent
+  # - name: start the ssh-agent
+  #   become_user: antonov
+  #   become: true
+  #   shell: ssh-agent -s
+  #   args:
+  #     executable: /bin/bash
+  #   register: ssh_agent_output
+
+  # - name: extract SSH_AUTH_SOCK from output
+  #   set_fact:
+  #     ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
+
+  # - name: add the ssh key to the ssh-agent
+  #   become_user: antonov
+  #   become: true
+  #   environment:
+  #     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+  #   expect:
+  #     command: ssh-add /home/antonov/.ssh/id_rsa
+  #     responses:
+  #       Enter passphrase for /home/antonov/.ssh/id_rsa:  "{{ github_password_from_key }}"
+
+  # - name: "git editor"
+  #   git_config:
+  #     name: core.editor
+  #     scope: system
+  #     value: "vim"
+
+  # - name: "git email"
+  #   git_config:
+  #     name: user.email
+  #     scope: system
+  #     value: "antonov.buscorr@gmail.com"
+
+  # - name: "git user name"
+  #   git_config:
+  #     name: user.name
+  #     scope: system
+  #     value: "Dmitrii_Antonov"
+
+  # - name: Git checkout it-notes
+  #   environment:
+  #     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
+  #   become_user: antonov
+  #   become: true
+  #   git:
+  #     repo: git@github.com:antonovdmitriy/it-notes.git
+  #     dest: /home/antonov/NOTES/it-notes
+  #     accept_hostkey: true
+
+  # - name: Git checkout code
+  #   environment:
+  #     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"  
+  #   become_user: antonov
+  #   become: true
+  #   git:
+  #     repo: git@github.com:antonovdmitriy/{{ item }}.git
+  #     dest: /home/antonov/CODE/{{ item }}
+  #     accept_hostkey: true
+  #   with_items:
+  #     - learning-aws-lambda
+  #     - learning-aws-lambda-springboot
+  #     - sandbox-linux
+  #     - bridle
+  #     - earthquake
+  # - name: Stop the ssh-agent
+  #   become_user: antonov
+  #   become: true
+  #   shell: "pkill ssh-agent"
+
+  - name: Ensure boto and boto3 modules are installed
+    pip:
+      name: ['boto3', 'botocore']
+
+  - name: Download oracle sql developer distributive from s3
+    aws_s3:
+      bucket: "{{ bucket_name }}"
+      aws_access_key: "{{ aws_access_key_id }}"
+      aws_secret_key: "{{ aws_secret_access_key }}"
+      object: "{{ filename }}"
+      dest: /opt/oracle-sql-developer.zip
+      mode: get
+      overwrite: "False"
+
+  - name: Extract oracle sql developer zip
+    ansible.builtin.unarchive:
+      src: /opt/oracle-sql-developer.zip
+      dest: /opt/
+      owner: antonov
+      group: antonov
+
+  - name: fist start oracle sql developer to write settings to home directory
     become_user: antonov
     become: true
-    shell: ssh-agent -s
+    shell: timeout 15 sh /opt/sqldeveloper/sqldeveloper.sh
     args:
       executable: /bin/bash
-    register: ssh_agent_output
+    register: timeout_cmd
+    failed_when: timeout_cmd.rc != 124      
 
-  - name: extract SSH_AUTH_SOCK from output
-    set_fact:
-      ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
-
-  - name: add the ssh key to the ssh-agent
+  - name: Change font size for oracle sql developer
     become_user: antonov
     become: true
-    environment:
-      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    expect:
-      command: ssh-add /home/antonov/.ssh/id_rsa
-      responses:
-        Enter passphrase for /home/antonov/.ssh/id_rsa:  "{{ github_password_from_key }}"
+    lineinfile: 
+      dest: /home/antonov/.sqldeveloper/system22.2.1.234.1810/o.sqldeveloper/ide.properties 
+      state: present
+      regexp: =18
+      line: Ide.FontSize.en=18      
 
-  - name: "git editor"
-    git_config:
-      name: core.editor
-      scope: system
-      value: "vim"
-
-  - name: "git email"
-    git_config:
-      name: user.email
-      scope: system
-      value: "antonov.buscorr@gmail.com"
-
-  - name: "git user name"
-    git_config:
-      name: user.name
-      scope: system
-      value: "Dmitrii_Antonov"
-
-  - name: Git checkout it-notes
-    environment:
-      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    become_user: antonov
-    become: true
-    git:
-      repo: git@github.com:antonovdmitriy/it-notes.git
-      dest: /home/antonov/NOTES/it-notes
-      accept_hostkey: true
-
-  - name: Git checkout code
-    environment:
-      SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"  
-    become_user: antonov
-    become: true
-    git:
-      repo: git@github.com:antonovdmitriy/{{ item }}.git
-      dest: /home/antonov/CODE/{{ item }}
-      accept_hostkey: true
-    with_items:
-      - learning-aws-lambda
-      - learning-aws-lambda-springboot
-      - sandbox-linux
-      - bridle
-      - earthquake
-  - name: Stop the ssh-agent
-    become_user: antonov
-    become: true
-    shell: "pkill ssh-agent"
-
-      
   # create two folders NOTES and CODE. Then install private key and public key to git. Then add email and user name to git. Then download projects from github to folder respectively. 
   # поставить google drive
   # поставить keepass
