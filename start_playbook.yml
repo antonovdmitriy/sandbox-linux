@@ -3,9 +3,6 @@
 - name: dev preparation
   hosts: localhost
   connection: local
-  vars:
-    bucket_name: sql-developer-for-personal-use  
-    filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
   tasks:
   - name: Mount VM Ware shared folder
     when: ansible_facts['virtualization_type'] == 'VMware'
@@ -21,12 +18,11 @@
         - vim
         - mc
         - git
+        - openjdk-17-jdk-headless
         - maven
         - gradle
         - docker.io
         - docker-compose
-        - openjdk-17-jdk
-        - python3-pip
       state: present
   - name: Install Intelij Idea, Visual Studio Code using snap repo
     snap:
@@ -56,7 +52,6 @@
       - /home/antonov/CODE/sandbox-linux
       - /home/antonov/NOTES
       - /home/antonov/NOTES/it-notes
-      - /opt/oracle-sql-developer
   - name: Write private key for main user
     copy:
       content: "{{ github_private_key }}"
@@ -156,70 +151,10 @@
     become: true
     shell: "pkill ssh-agent"
 
-  - name: Ensure boto and boto3 modules are installed
-    pip:
-      name: ['boto3', 'botocore']
-
-  - name: Download oracle sql developer distributive from s3
-    aws_s3:
-      bucket: "{{ bucket_name }}"
-      aws_access_key: "{{ aws_access_key_id }}"
-      aws_secret_key: "{{ aws_secret_access_key }}"
-      object: "{{ filename }}"
-      dest: /opt/oracle-sql-developer.zip
-      mode: get
-      overwrite: "False"
-
-  - name: Extract oracle sql developer zip
-    ansible.builtin.unarchive:
-      src: /opt/oracle-sql-developer.zip
-      creates: /opt/sqldeveloper
-      dest: /opt/
-      owner: antonov
-      group: antonov
-
-  - name: Check fact that oracle sql developer has been launched before
-    stat:
-      path: /home/antonov/.sqldeveloper
-    register: stat_about_sqldeveloper_user_directory
-
-  - name: first start oracle sql developer to write settings to home directory
-    when: not stat_about_sqldeveloper_user_directory.stat.exists
-    become_user: antonov
-    become: true
-    shell: timeout 15 sh /opt/sqldeveloper/sqldeveloper.sh
-    args:
-      executable: /bin/bash
-    register: timeout_cmd
-    failed_when: timeout_cmd.rc != 124
-
-  - name: Delete oracle sql developer cache after interrupted start
-    when: not stat_about_sqldeveloper_user_directory.stat.exists
-    ansible.builtin.file:
-      state: absent
-      path: /home/antonov/.sqldeveloper/system22.2.1.234.1810/system_cache
-
-  - name: Change font size for oracle sql developer
-    become_user: antonov
-    become: true
-    lineinfile: 
-      dest: /home/antonov/.sqldeveloper/system22.2.1.234.1810/o.sqldeveloper/ide.properties 
-      state: present
-      regexp: =18
-      line: Ide.FontSize.en=18
-
-  - name: Add oracle sql developer to favorites
-    ansible.builtin.blockinfile:
-      path: /usr/share/applications/sqldeveloper.desktop
-      mode: "755"
-      create: true
-      block: |
-        #!/usr/bin/env xdg-open
-        [Desktop Entry]
-        Version=1.0
-        Type=Application
-        Terminal=false
-        Exec=/opt/sqldeveloper/sqldeveloper.sh
-        Name=Oracle Sql Developer
-        Comment=app for sql browsing
-        Icon=/opt/sqldeveloper/icon.png
+      
+  # create two folders NOTES and CODE. Then install private key and public key to git. Then add email and user name to git. Then download projects from github to folder respectively. 
+  # поставить google drive
+  # поставить keepass
+  # поставить oracle sql developer
+  # поставить todo list
+  
