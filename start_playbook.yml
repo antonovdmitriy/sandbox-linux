@@ -26,6 +26,7 @@
         - docker.io
         - docker-compose
         - openjdk-17-jdk
+        - python3-pip
       state: present
   - name: Install Intelij Idea, Visual Studio Code using snap repo
     snap:
@@ -182,7 +183,7 @@
       path: /home/antonov/.sqldeveloper
     register: stat_about_sqldeveloper_user_directory
 
-  - name: fist start oracle sql developer to write settings to home directory
+  - name: first start oracle sql developer to write settings to home directory
     when: not stat_about_sqldeveloper_user_directory.stat.exists
     become_user: antonov
     become: true
@@ -191,6 +192,12 @@
       executable: /bin/bash
     register: timeout_cmd
     failed_when: timeout_cmd.rc != 124
+
+  - name: Delete oracle sql developer cache after interrupted start
+    when: not stat_about_sqldeveloper_user_directory.stat.exists
+    ansible.builtin.file:
+      state: absent
+      path: /home/antonov/.sqldeveloper/system22.2.1.234.1810/system_cache
 
   - name: Change font size for oracle sql developer
     become_user: antonov
