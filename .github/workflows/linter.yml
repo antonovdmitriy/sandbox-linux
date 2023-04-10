@@ -18,7 +18,10 @@ on:
   workflow_dispatch:    
 
 permissions:
-  pull-requests: write
+  # contents: read
+  # pull-requests: write
+  statuses: write
+  checks: write
 
 ###############
 # Set the Job #
