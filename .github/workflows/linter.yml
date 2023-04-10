@@ -17,6 +17,12 @@ on:
     branches: [main]
   workflow_dispatch:    
 
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+  checks: write
+
 ###############
 # Set the Job #
 ###############
