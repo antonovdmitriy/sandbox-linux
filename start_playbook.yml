@@ -160,7 +160,7 @@
         name: ["boto3", "botocore"]
 
     - name: Download oracle sql developer distributive from s3
-      amazon.aws.s3_object:
+      amazon.aws.aws_s3:
         bucket: "{{ bucket_name }}"
         aws_access_key: "{{ aws_access_key_id }}"
         aws_secret_key: "{{ aws_secret_access_key }}"
