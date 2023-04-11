@@ -60,6 +60,7 @@
       path: "{{ item }}"
       owner: antonov
       group: antonov
+      mode: "755"
       state: directory
     loop:
       - /home/antonov/.ssh
@@ -109,7 +110,7 @@
     ansible.builtin.set_fact:
       ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
 
-  - name: add the ssh key to the ssh-agent
+  - name: Add the ssh key to the ssh-agent
     become_user: antonov
     become: true
     environment:
@@ -161,4 +162,4 @@
   - name: Stop the ssh-agent
     become_user: antonov
     become: true
-    shell: "pkill ssh-agent"      
+    ansible.builtin.shell: "pkill ssh-agent"      
