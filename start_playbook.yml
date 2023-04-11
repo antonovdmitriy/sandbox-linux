@@ -9,7 +9,7 @@
   tasks:
   - name: Mount VM Ware shared folder
     when: ansible_facts['virtualization_type'] == 'VMware'
-    mount:
+    ansible.posix.mount:
       path: /mnt/hgfs
       src: vmhgfs-fuse
       fstype: fuse
