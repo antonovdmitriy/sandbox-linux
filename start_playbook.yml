@@ -86,7 +86,7 @@
       group: antonov
       force: false
       mode: '0600'
-  - name: start the ssh-agent
+  - name: Start the ssh-agent
     become_user: antonov
     become: true
     ansible.builtin.shell: ssh-agent -s
@@ -126,7 +126,7 @@
       scope: system
       value: "Dmitrii_Antonov"
 
-  - name: Git checkout it-notes
+  - name: Git checkout it-notes # noqa: latest
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
     become_user: antonov
@@ -136,7 +136,7 @@
       dest: /home/antonov/NOTES/it-notes
       accept_hostkey: true
 
-  - name: Git checkout code
+  - name: Git checkout code # noqa: latest
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"  
     become_user: antonov

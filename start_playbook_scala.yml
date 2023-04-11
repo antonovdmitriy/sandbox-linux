@@ -13,8 +13,8 @@
       opts: defaults,allow_other
       state: present
 
-  - name: install packages
-    package:
+  - name: Install packages
+    ansible.builtin.package:
       name: 
         - vim
         - mc
@@ -26,33 +26,33 @@
       state: present
 
   - name: Install Intelij Idea, Visual Studio Code using snap repo
-    snap:
+    community.general.snap:
       name: 
         - intellij-idea-community
         - code
       classic: true
 
   - name: Read intelij idea info file
-    shell: cat /snap/intellij-idea-community/current/product-info.json
+    ansible.builtin.shell: cat /snap/intellij-idea-community/current/product-info.json
     register: intelij_info_output
-  - name: save the intelij_info_output as json object
-    set_fact:
+  - name: Save the intelij_info_output as json object
+    ansible.builtin.set_fact:
       intelij_info_json: "{{ intelij_info_output.stdout | from_json }}"
-  - name: read intelij folder name for plugins from intelij_info_json
-    set_fact:
+  - name: Read intelij folder name for plugins from intelij_info_json
+    ansible.builtin.set_fact:
       intelij_directory_name_for_plugins: "{{ intelij_info_json | json_query('dataDirectoryName') }}"
 
-  - name: install intelij idea plugins
+  - name: Install intelij idea plugins
     become_user: antonov
     become: true
-    shell: '[ -d /home/antonov/.local/share/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }} ] || [ -f /home/antonov/.cache/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }}.zip ] || /snap/intellij-idea-community/current/bin/idea.sh installPlugins {{ item.id }} || echo true'
+    ansible.builtin.shell: '[ -d /home/antonov/.local/share/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }} ] || [ -f /home/antonov/.cache/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }}.zip ] || /snap/intellij-idea-community/current/bin/idea.sh installPlugins {{ item.id }} || echo true'
     args:
       executable: /bin/bash
     loop:
       - { id: "org.intellij.scala", folder_to_check: "Scala" }   
 
-  - name: add user antonov
-    user:
+  - name: Add user antonov
+    ansible.builtin.user:
       name: antonov
       shell: /bin/bash
   - name: Create directory if it does not exist
@@ -69,7 +69,7 @@
       - /home/antonov/NOTES
       - /home/antonov/NOTES/it-notes
   - name: Write private key for main user
-    copy:
+    ansible.builtin.copy:
       content: "{{ github_private_key }}"
       dest: /home/antonov/.ssh/id_rsa
       owner: antonov
@@ -77,7 +77,7 @@
       group: antonov
       mode: '0600'
   - name: Write private key for ansible user
-    copy:
+    ansible.builtin.copy:
       content: "{{ github_private_key }}"
       dest: /home/ansible/.ssh/id_rsa
       force: false
@@ -97,16 +97,16 @@
       force: false
       mode: '0600'
 
-  - name: start the ssh-agent
+  - name: Start the ssh-agent
     become_user: antonov
     become: true
-    shell: ssh-agent -s
+    ansible.builtin.shell: ssh-agent -s
     args:
       executable: /bin/bash
     register: ssh_agent_output
 
-  - name: extract SSH_AUTH_SOCK from output
-    set_fact:
+  - name: Extract SSH_AUTH_SOCK from output
+    ansible.builtin.set_fact:
       ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
 
   - name: add the ssh key to the ssh-agent
@@ -114,45 +114,45 @@
     become: true
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    expect:
+    ansible.builtin.expect:
       command: ssh-add /home/antonov/.ssh/id_rsa
       responses:
         Enter passphrase for /home/antonov/.ssh/id_rsa:  "{{ github_password_from_key }}"
 
-  - name: "git editor"
-    git_config:
+  - name: "Git editor"
+    community.general.git_config:
       name: core.editor
       scope: system
       value: "vim"
 
-  - name: "git email"
-    git_config:
+  - name: "Git email"
+    community.general.git_config:
       name: user.email
       scope: system
       value: "antonov.buscorr@gmail.com"
 
-  - name: "git user name"
-    git_config:
+  - name: "Git user name"
+    community.general.git_config:
       name: user.name
       scope: system
       value: "Dmitrii_Antonov"
 
-  - name: Git checkout it-notes
+  - name: Git checkout it-notes # noqa: latest
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
     become_user: antonov
     become: true
-    git:
+    ansible.builtin.git:
       repo: git@github.com:antonovdmitriy/it-notes.git
       dest: /home/antonov/NOTES/it-notes
       accept_hostkey: true
 
-  - name: Git checkout code
+  - name: Git checkout code # noqa: latest
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"  
     become_user: antonov
     become: true
-    git:
+    ansible.builtin.git:
       repo: git@github.com:antonovdmitriy/{{ item }}.git
       dest: /home/antonov/CODE/{{ item }}
       accept_hostkey: true
