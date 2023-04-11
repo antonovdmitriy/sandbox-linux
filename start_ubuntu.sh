@@ -3,15 +3,7 @@
 set -x
 
 # File name
-readonly PROGNAME=$(basename $0)
-# File name, without the extension
-readonly PROGBASENAME=${PROGNAME%.*}
-# File directory
-readonly PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# Arguments
-readonly ARGS="$@"
-# Arguments number
-readonly ARGNUM="$#"
+PROGNAME=$(basename "$0")
 
 usage() {
 	echo "Script for prepare linux enviromment for development"
@@ -68,7 +60,7 @@ scala)
   playbook_to_start=$scala_playbook
   ;;
 *)
-  echo 'wrong envinoment. see --help'; exit -1
+  echo 'wrong envinoment. see --help' >&2; exit 1
   ;;
 esac
 
