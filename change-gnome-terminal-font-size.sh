@@ -57,5 +57,5 @@ done
 
 # get profile id
 profile_id=$(gsettings get org.gnome.Terminal.ProfilesList list | tr -d "[]'")
-dbus-run-session gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile_id/ use-system-font false
-dbus-run-session gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile_id/ font "$font $size"
+dbus-run-session gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:"$profile_id"/ use-system-font false
+dbus-run-session gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:"$profile_id"/ font "$font $size"

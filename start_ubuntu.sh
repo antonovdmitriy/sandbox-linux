@@ -4,14 +4,6 @@ set -x
 
 # File name
 PROGNAME=$(basename "$0")
-# File name, without the extension
-PROGBASENAME=${PROGNAME%.*}
-# File directory
-PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# Arguments
-ARGS="$@"
-# Arguments number
-ARGNUM="$#"
 
 usage() {
 	echo "Script for prepare linux enviromment for development"
