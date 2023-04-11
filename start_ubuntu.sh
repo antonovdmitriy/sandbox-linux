@@ -68,7 +68,7 @@ scala)
   playbook_to_start=$scala_playbook
   ;;
 *)
-  echo 'wrong envinoment. see --help'; exit -1
+  echo 'wrong envinoment. see --help' >&2; exit 1
   ;;
 esac
 
