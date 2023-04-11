@@ -2,8 +2,8 @@
 
 ls -l
 
-if [ -z "$1" ]; then echo $1 argument for playbook is empty; exit -1; fi
-if [ ! -f "$1" ]; then echo $1 playbook does not exist; exit -2; fi
+if [ -z "$1" ]; then echo "$1" argument for playbook is empty; exit -1; fi
+if [ ! -f "$1" ]; then echo "$1" playbook does not exist; exit -2; fi
 
 ## create technical ansible user
 useradd  -m ansible -s /bin/bash
