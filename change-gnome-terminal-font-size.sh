@@ -3,7 +3,7 @@
 # set -x
 
 # File name
-readonly PROGNAME=$(basename $0)
+PROGNAME=$(basename "$0")
 
 usage() {
 	echo "Script to change font gnome-terminal font size. Tested on Ubuntu 22"
@@ -53,7 +53,7 @@ do
 	shift
 done
 
-( [ -z $font ] || [ -z $size ] ) && echo "see --help for correct arguments usage" >&2 && exit 1
+{ [ -z "$font" ] || [ -z "$size" ]; } && echo "see --help for correct arguments usage" >&2 && exit 1
 
 # get profile id
 profile_id=$(gsettings get org.gnome.Terminal.ProfilesList list | tr -d "[]'")

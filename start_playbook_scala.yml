@@ -1,6 +1,6 @@
 ---
 
-- name: dev preparation
+- name: Dev preparation
   hosts: localhost
   connection: local
   tasks:

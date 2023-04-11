@@ -3,15 +3,15 @@
 set -x
 
 # File name
-readonly PROGNAME=$(basename $0)
+PROGNAME=$(basename "$0")
 # File name, without the extension
-readonly PROGBASENAME=${PROGNAME%.*}
+PROGBASENAME=${PROGNAME%.*}
 # File directory
-readonly PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+PROGDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # Arguments
-readonly ARGS="$@"
+ARGS="$@"
 # Arguments number
-readonly ARGNUM="$#"
+ARGNUM="$#"
 
 usage() {
 	echo "Script for prepare linux enviromment for development"
