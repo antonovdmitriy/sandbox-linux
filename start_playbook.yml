@@ -1,6 +1,6 @@
 ---
 
-- name: dev preparation
+- name: Dev preparation
   hosts: localhost
   connection: local
   vars:
@@ -15,8 +15,8 @@
       fstype: fuse
       opts: defaults,allow_other
       state: present
-  - name: install packages
-    package:
+  - name: Install packages
+    ansible.builtin.package:
       name: 
         - vim
         - mc
@@ -29,14 +29,14 @@
         - python3-pip
       state: present
   - name: Install Intelij Idea, Visual Studio Code using snap repo
-    snap:
+    community.general.snap:
       name: 
         - intellij-idea-community
         - code
       classic: true
 
-  - name: add user antonov
-    user:
+  - name: Add user antonov
+    ansible.builtin.user:
       name: antonov
       shell: /bin/bash
   - name: Create directory if it does not exist
@@ -44,6 +44,7 @@
       path: "{{ item }}"
       owner: antonov
       group: antonov
+      mode: "755"
       state: directory
     loop:
       - /home/antonov/.ssh
@@ -58,7 +59,7 @@
       - /home/antonov/NOTES/it-notes
       - /opt/oracle-sql-developer
   - name: Write private key for main user
-    copy:
+    ansible.builtin.copy:
       content: "{{ github_private_key }}"
       dest: /home/antonov/.ssh/id_rsa
       owner: antonov
@@ -66,7 +67,7 @@
       group: antonov
       mode: '0600'
   - name: Write private key for ansible user
-    copy:
+    ansible.builtin.copy:
       content: "{{ github_private_key }}"
       dest: /home/ansible/.ssh/id_rsa
       force: false
@@ -85,43 +86,42 @@
       group: antonov
       force: false
       mode: '0600'
-
   - name: start the ssh-agent
     become_user: antonov
     become: true
-    shell: ssh-agent -s
+    ansible.builtin.shell: ssh-agent -s
     args:
       executable: /bin/bash
     register: ssh_agent_output
 
-  - name: extract SSH_AUTH_SOCK from output
-    set_fact:
+  - name: Extract SSH_AUTH_SOCK from output
+    ansible.builtin.set_fact:
       ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
 
-  - name: add the ssh key to the ssh-agent
+  - name: Add the ssh key to the ssh-agent
     become_user: antonov
     become: true
     environment:
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-    expect:
+    ansible.builtin.expect:
       command: ssh-add /home/antonov/.ssh/id_rsa
       responses:
         Enter passphrase for /home/antonov/.ssh/id_rsa:  "{{ github_password_from_key }}"
 
-  - name: "git editor"
-    git_config:
+  - name: "Git editor"
+    community.general.git_config:
       name: core.editor
       scope: system
       value: "vim"
 
-  - name: "git email"
-    git_config:
+  - name: "Git email"
+    community.general.git_config:
       name: user.email
       scope: system
       value: "antonov.buscorr@gmail.com"
 
-  - name: "git user name"
-    git_config:
+  - name: "Git user name"
+    community.general.git_config:
       name: user.name
       scope: system
       value: "Dmitrii_Antonov"
@@ -131,7 +131,7 @@
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
     become_user: antonov
     become: true
-    git:
+    ansible.builtin.git:
       repo: git@github.com:antonovdmitriy/it-notes.git
       dest: /home/antonov/NOTES/it-notes
       accept_hostkey: true
@@ -141,7 +141,7 @@
       SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"  
     become_user: antonov
     become: true
-    git:
+    ansible.builtin.git:
       repo: git@github.com:antonovdmitriy/{{ item }}.git
       dest: /home/antonov/CODE/{{ item }}
       accept_hostkey: true
@@ -154,14 +154,14 @@
   - name: Stop the ssh-agent
     become_user: antonov
     become: true
-    shell: "pkill ssh-agent"
+    ansible.builtin.shell: "pkill ssh-agent"
 
   - name: Ensure boto and boto3 modules are installed
-    pip:
+    ansible.builtin.pip:
       name: ['boto3', 'botocore']
 
   - name: Download oracle sql developer distributive from s3
-    aws_s3:
+    amazon.aws.s3_object:
       bucket: "{{ bucket_name }}"
       aws_access_key: "{{ aws_access_key_id }}"
       aws_secret_key: "{{ aws_secret_access_key }}"
@@ -179,15 +179,15 @@
       group: antonov
 
   - name: Check fact that oracle sql developer has been launched before
-    stat:
+    ansible.builtin.stat:
       path: /home/antonov/.sqldeveloper
     register: stat_about_sqldeveloper_user_directory
 
-  - name: first start oracle sql developer to write settings to home directory
+  - name: First start oracle sql developer to write settings to home directory
     when: not stat_about_sqldeveloper_user_directory.stat.exists
     become_user: antonov
     become: true
-    shell: timeout 15 sh /opt/sqldeveloper/sqldeveloper.sh
+    ansible.builtin.shell: timeout 15 sh /opt/sqldeveloper/sqldeveloper.sh
     args:
       executable: /bin/bash
     register: timeout_cmd
@@ -202,7 +202,7 @@
   - name: Change font size for oracle sql developer
     become_user: antonov
     become: true
-    lineinfile: 
+    ansible.builtin.lineinfile: 
       dest: /home/antonov/.sqldeveloper/system22.2.1.234.1810/o.sqldeveloper/ide.properties 
       state: present
       regexp: =18
