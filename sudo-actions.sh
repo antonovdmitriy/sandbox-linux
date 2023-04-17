@@ -1,19 +1,16 @@
 #!/bin/bash
 
-ls -l
-
 if [ -z "$1" ]; then echo "$1" argument for playbook is empty >&2; exit 1; fi
 if [ ! -f "$1" ]; then echo "$1" playbook does not exist >&2; exit 2; fi
 
-## create technical ansible user
+# create technical ansible user
 useradd  -m ansible -s /bin/bash
-## grant ansible user get sudo without password
+# grant ansible user get sudo without password
 echo "ansible ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
-# ## update repositories and system packages
-# add rights to read from shared folder in virtual box
-# usermod -aG vboxsf ansible
+# update repositories and system packages
 apt update
 apt -y upgrade
+# clean old packages and journal
 apt autoremove
 apt autoclean
 journalctl --vacuum-time=1d
