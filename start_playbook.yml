@@ -3,61 +3,73 @@
   hosts: localhost
   connection: local
   vars:
+    # vm ware specific
+    shared_folder_path: /mnt/hgfs
+    # packages
+    packages_to_install:
+      - vim
+      - mc
+      - git
+      - maven
+      - gradle
+      - docker.io
+      - docker-compose
+      - openjdk-17-jdk
+      - python3-pip
+    snap_packages_to_install:
+      - intellij-idea-community
+      - code
+    # create user      
+    username: antonov
+    user_shell: /bin/bash
+    # directories to create
+    home: "/home/{{ username }}"
+    directories_to_create:
+      - "{{ home }}/.ssh"
+      - "{{ home }}/CODE"
+      - "{{ home }}/CODE/learning-aws-lambda"
+      - "{{ home }}/CODE/learning-aws-lambda-springboot"
+      - "{{ home }}/CODE/bridle"
+      - "{{ home }}/CODE/earthquake"
+      - "{{ home }}/CODE/sandbox-linux"
+      - "{{ home }}/NOTES"
+      - "{{ home }}/NOTES/it-notes"    
     # oracle sql developer
     bucket_name_for_sql_developer_dist: sql-developer-for-personal-use
     sql_developer_distr_filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
+
   tasks:
     - name: Mount VM Ware shared folder
       when: ansible_facts['virtualization_type'] == 'VMware'
       ansible.posix.mount:
-        path: /mnt/hgfs
+        path: "{{ shared_folder_path }}"
         src: vmhgfs-fuse
         fstype: fuse
         opts: defaults,allow_other
         state: present
     - name: Install packages
       ansible.builtin.package:
-        name:
-          - vim
-          - mc
-          - git
-          - maven
-          - gradle
-          - docker.io
-          - docker-compose
-          - openjdk-17-jdk
-          - python3-pip
+        name: "{{ packages_to_install }}"
         state: present
     - name: Install Intelij Idea, Visual Studio Code using snap repo
       community.general.snap:
-        name:
-          - intellij-idea-community
-          - code
+        name: "{{ snap_packages_to_install }}"
         classic: true
-
     - name: Add user antonov
       ansible.builtin.user:
-        name: antonov
-        shell: /bin/bash
+        name: "{{ username }}"
+        shell: "{{ user_shell }}"
     - name: Create directory if it does not exist
       ansible.builtin.file:
         path: "{{ item }}"
-        owner: antonov
-        group: antonov
+        owner: "{{ username }}"
+        group: "{{ username }}"
         mode: "755"
         state: directory
-      loop:
-        - /home/antonov/.ssh
-        - /home/ansible/.ssh
-        - /home/antonov/CODE
-        - /home/antonov/CODE/learning-aws-lambda
-        - /home/antonov/CODE/learning-aws-lambda-springboot
-        - /home/antonov/CODE/bridle
-        - /home/antonov/CODE/earthquake
-        - /home/antonov/CODE/sandbox-linux
-        - /home/antonov/NOTES
-        - /home/antonov/NOTES/it-notes
-        - /opt/oracle-sql-developer
+      loop: "{{ directories_to_create }}"
+
+TODO: start work here
+
     - name: Write private key for main user
       ansible.builtin.copy:
         content: "{{ github_private_key }}"
