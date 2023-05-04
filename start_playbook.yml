@@ -3,8 +3,9 @@
   hosts: localhost
   connection: local
   vars:
-    bucket_name: sql-developer-for-personal-use
-    filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
+    # oracle sql developer
+    bucket_name_for_sql_developer_dist: sql-developer-for-personal-use
+    sql_developer_distr_filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
   tasks:
     - name: Mount VM Ware shared folder
       when: ansible_facts['virtualization_type'] == 'VMware'
@@ -161,10 +162,10 @@
 
     - name: Download oracle sql developer distributive from s3
       amazon.aws.aws_s3:
-        bucket: "{{ bucket_name }}"
+        bucket: "{{ bucket_name_for_sql_developer_dist }}"
         aws_access_key: "{{ aws_access_key_id }}"
         aws_secret_key: "{{ aws_secret_access_key }}"
-        object: "{{ filename }}"
+        object: "{{ sql_developer_distr_filename }}"
         dest: /opt/oracle-sql-developer.zip
         mode: get
         overwrite: "False"
