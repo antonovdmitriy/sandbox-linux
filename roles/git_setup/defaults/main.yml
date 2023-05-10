@@ -2,11 +2,6 @@
 directories_to_create:
   - "{{ directory_for_ssh_main_user }}"
   - "{{ directory_for_code }}"
-  - "{{ directory_for_code }}/learning-aws-lambda"
-  - "{{ directory_for_code }}/learning-aws-lambda-springboot"
-  - "{{ directory_for_code }}/bridle"
-  - "{{ directory_for_code }}/earthquake"
-  - "{{ directory_for_code }}/sandbox-linux"
   - "{{ directory_for_notes }}"
   - "{{ directory_for_notes }}/it-notes"
 directory_for_code: "{{ home }}/CODE"
@@ -20,9 +15,3 @@ git_user: "Dmitrii_Antonov"
 github_path: "git@github.com:antonovdmitriy"
 notes_repositories_to_clone:
   - it-notes
-repositories_to_clone:
-  - learning-aws-lambda
-  - learning-aws-lambda-springboot
-  - sandbox-linux
-  - bridle
-  - earthquake  

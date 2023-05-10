@@ -3,6 +3,10 @@
   ansible.builtin.user:
     name: "{{ username }}"
     shell: "{{ user_shell }}"
+
+- name: Merge lists
+  set_fact:
+    packages_to_install: "{{ packages_to_install | default([]) | union(additional_packages | default([])) }}"
 - name: Install packages
   ansible.builtin.package:
     name: "{{ packages_to_install }}"

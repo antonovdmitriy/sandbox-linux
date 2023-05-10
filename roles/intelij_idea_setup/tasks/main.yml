@@ -16,6 +16,9 @@
   # First check a directory that only exists if plugin already had been installed and intelij had been launched after that
   # Second check an archive that downloaded after install plugin command invoked but intelij idea had not been started yet. It can be possible
   # In the end true to exit as installPlugins exits with no 0 code 
+- name: Merge lists
+  set_fact:
+    plugins_to_install: "{{ plugins_to_install | default([]) | union(additional_plugins | default([])) }}"  
 - name: Install intelij idea plugins
   become_user: "{{ username }}"
   become: true

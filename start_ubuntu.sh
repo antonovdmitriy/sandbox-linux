@@ -3,7 +3,7 @@
 # File name
 PROGNAME=$(basename "$0")
 environment=java
-java_playbook=./start_playbook.yml
+java_playbook=./start_playbook_java.yml
 scala_playbook=./start_playbook_scala.yml
 
 usage() {

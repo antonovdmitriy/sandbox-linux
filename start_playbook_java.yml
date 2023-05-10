@@ -1,0 +1,31 @@
+---
+- name: Dev preparation
+  hosts: localhost
+  connection: local
+  vars:
+    username: antonov
+    user_shell: /bin/bash
+    home: "/home/{{ username }}"
+  roles:
+    - vmware_specific_setup
+    - role: environment_setup
+      vars:
+        additional_packages:
+          - maven
+          - gradle
+          - docker-compose
+          - openjdk-17-jdk
+    - intelij_idea_setup
+    - role: git_setup
+      vars:
+        additional_directories:
+          - "{{ directory_for_code }}/learning-aws-lambda"
+          - "{{ directory_for_code }}/learning-aws-lambda-springboot"
+          - "{{ directory_for_code }}/bridle"
+          - "{{ directory_for_code }}/earthquake"
+        additional_repositories:
+          - learning-aws-lambda
+          - learning-aws-lambda-springboot
+          - bridle
+          - earthquake  
+    - oracle_sql_developer_setup

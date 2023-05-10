@@ -5,8 +5,6 @@ packages_to_install:
   - tree
   - mc
   - git
-  - maven
-  - gradle
   - docker.io
   - docker-compose
   - openjdk-17-jdk
