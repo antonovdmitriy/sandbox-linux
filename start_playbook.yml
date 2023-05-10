@@ -40,6 +40,11 @@
       - "{{ directory_for_code }}/sandbox-linux"
       - "{{ directory_for_notes }}"
       - "{{ directory_for_notes }}/it-notes"
+    # intelij idea plugins
+    intelij_directory: "/snap/intellij-idea-community/current"
+    file_with_plugin_directory_info: "{{ intelij_directory }}/product-info.json"
+    plugins_to_install:
+      - { id: "Docker", folder_to_check: "clouds-docker-impl" }
     # git config
     permissions_for_ssh_keys: "0600"
     git_email: "antonov.buscorr@gmail.com"
@@ -64,8 +69,7 @@
     oracle_sql_developer_system_cache_directory: "{{ oracle_sql_developer_user_settings_directory }}/system_cache"
     oracle_sql_developer_ide_setting_file: "{{ oracle_sql_developer_user_settings_directory }}/o.sqldeveloper/ide.properties"
     oracle_sql_developer_font_size: "18"
-    oracle_sql_developer_favorites_file: "/usr/share/applications/sqldeveloper.desktop"    
-
+    oracle_sql_developer_favorites_file: "/usr/share/applications/sqldeveloper.desktop"
   tasks:
     - name: Mount VM Ware shared folder
       when: ansible_facts['virtualization_type'] == 'VMware'
@@ -79,10 +83,50 @@
       ansible.builtin.package:
         name: "{{ packages_to_install }}"
         state: present
+      ## It will be applied only after after new session log in. Unfortunately..
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ username }}"
+        append: yes
+        groups: docker
+    - name: Ensure Docker service is restarted
+      ansible.builtin.systemd:
+        name: docker.service
+        state: restarted
+        enabled: yes         
+    - name: reset ssh connection
+      local_action:
+        module: file
+        path: "~/.ansible/cp"
+        state: absent        
     - name: Install Intelij Idea, Visual Studio Code using snap repo
       community.general.snap:
         name: "{{ snap_packages_to_install }}"
         classic: true
+    - name: Read intelij idea info file
+      ansible.builtin.shell: "cat {{ file_with_plugin_directory_info }}"
+      register: intelij_info_output
+    - name: Save the intelij_info_output as json object
+      ansible.builtin.set_fact:
+        intelij_info_json: "{{ intelij_info_output.stdout | from_json }}"
+    - name: Read intelij folder name for plugins from intelij_info_json
+      ansible.builtin.set_fact:
+        intelij_directory_name_for_plugins: "{{ intelij_info_json | json_query('dataDirectoryName') }}"
+      # Install intelij idea plugins
+      # First check a directory that only exists if plugin already had been installed and intelij had been launched after that
+      # Second check an archive that downloaded after install plugin command invoked but intelij idea had not been started yet. It can be possible
+      # In the end true to exit as installPlugins exits with no 0 code 
+    - name: Install intelij idea plugins
+      become_user: "{{ username }}"
+      become: true
+      ansible.builtin.shell: >
+        [ -d {{ home }}/.local/share/JetBrains/{{ intelij_directory_name_for_plugins }}/{{ item.folder_to_check }} ]
+        || [ -f {{ home }}/.cache/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }}.zip ]
+        || {{ intelij_directory }}/bin/idea.sh installPlugins {{ item.id }}
+        || echo true      
+      args:
+        executable: "{{ user_shell }}"
+      loop: "{{ plugins_to_install }}"
     - name: Add main user
       ansible.builtin.user:
         name: "{{ username }}"
