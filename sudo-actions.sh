@@ -11,8 +11,8 @@ echo "ansible ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
 apt update
 apt -y upgrade
 # clean old packages and journal
-apt autoremove
-apt autoclean
+apt -y autoremove
+apt -y autoclean
 journalctl --vacuum-time=1d
 ## install ansible
 apt -y install ansible
@@ -32,6 +32,6 @@ cp "$1" /home/ansible/start_playbook.yml
 chown ansible:ansible /home/ansible/start_playbook.yml
 ## run start playbok as ansible user
 sudo -u ansible -H sh -c "cd ~; ansible-playbook start_playbook.yml -vv -e @/mnt/hgfs/secrets/secret.yml --ask-vault-pass"
-## delete technocal ansible user
+## delete technical ansible user
 userdel -r ansible
 sed -i '/ansible/d' /etc/sudoers

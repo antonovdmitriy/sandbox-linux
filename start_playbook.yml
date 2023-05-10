@@ -19,24 +19,52 @@
     snap_packages_to_install:
       - intellij-idea-community
       - code
-    # create user      
+    # create user
     username: antonov
     user_shell: /bin/bash
     # directories to create
     home: "/home/{{ username }}"
+    directory_for_code: "{{ home }}/CODE"
+    directory_for_notes: "{{ home }}/NOTES"
+    directory_for_ssh_main_user: "{{ home }}/.ssh"
+    temp_directories_to_create:
+      - ~/.ssh
     directories_to_create:
-      - "{{ home }}/.ssh"
-      - "{{ home }}/CODE"
-      - "{{ home }}/CODE/learning-aws-lambda"
-      - "{{ home }}/CODE/learning-aws-lambda-springboot"
-      - "{{ home }}/CODE/bridle"
-      - "{{ home }}/CODE/earthquake"
-      - "{{ home }}/CODE/sandbox-linux"
-      - "{{ home }}/NOTES"
-      - "{{ home }}/NOTES/it-notes"    
+      - "{{ oracle_sql_developer_directory }}"
+      - "{{ directory_for_ssh_main_user }}"
+      - "{{ directory_for_code }}"
+      - "{{ directory_for_code }}/learning-aws-lambda"
+      - "{{ directory_for_code }}/learning-aws-lambda-springboot"
+      - "{{ directory_for_code }}/bridle"
+      - "{{ directory_for_code }}/earthquake"
+      - "{{ directory_for_code }}/sandbox-linux"
+      - "{{ directory_for_notes }}"
+      - "{{ directory_for_notes }}/it-notes"
+    # git config
+    permissions_for_ssh_keys: "0600"
+    git_email: "antonov.buscorr@gmail.com"
+    git_user: "Dmitrii_Antonov"
+    # git clone
+    github_path: "git@github.com:antonovdmitriy"
+    notes_repositories_to_clone:
+      - it-notes
+    repositories_to_clone:
+      - learning-aws-lambda
+      - learning-aws-lambda-springboot
+      - sandbox-linux
+      - bridle
+      - earthquake
     # oracle sql developer
     bucket_name_for_sql_developer_dist: sql-developer-for-personal-use
     sql_developer_distr_filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
+    directory_for_apps: "/opt"
+    oracle_sql_developer_directory: "{{ directory_for_apps }}/oracle-sql-developer"
+    oracle_sql_developer_archive: "{{ directory_for_apps }}/oracle-sql-developer.zip"
+    oracle_sql_developer_user_settings_directory: "{{ home }}/.sqldeveloper/system22.2.1.234.1810"
+    oracle_sql_developer_system_cache_directory: "{{ oracle_sql_developer_user_settings_directory }}/system_cache"
+    oracle_sql_developer_ide_setting_file: "{{ oracle_sql_developer_user_settings_directory }}/o.sqldeveloper/ide.properties"
+    oracle_sql_developer_font_size: "18"
+    oracle_sql_developer_favorites_file: "/usr/share/applications/sqldeveloper.desktop"    
 
   tasks:
     - name: Mount VM Ware shared folder
@@ -55,10 +83,16 @@
       community.general.snap:
         name: "{{ snap_packages_to_install }}"
         classic: true
-    - name: Add user antonov
+    - name: Add main user
       ansible.builtin.user:
         name: "{{ username }}"
         shell: "{{ user_shell }}"
+    - name: Create temp directories for tech user
+      become: false
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop: "{{ temp_directories_to_create }}"
     - name: Create directory if it does not exist
       ansible.builtin.file:
         path: "{{ item }}"
@@ -67,162 +101,142 @@
         mode: "755"
         state: directory
       loop: "{{ directories_to_create }}"
-
-TODO: start work here
-
     - name: Write private key for main user
       ansible.builtin.copy:
         content: "{{ github_private_key }}"
-        dest: /home/antonov/.ssh/id_rsa
-        owner: antonov
+        dest: "{{ directory_for_ssh_main_user }}/id_rsa"
+        owner: "{{ username }}"
         force: false
-        group: antonov
-        mode: "0600"
-    - name: Write private key for ansible user
+        group: "{{ username }}"
+        mode: "{{ permissions_for_ssh_keys }}"
+    - name: Write private key for tech user
+      become: false
       ansible.builtin.copy:
         content: "{{ github_private_key }}"
-        dest: /home/ansible/.ssh/id_rsa
+        dest: ~/.ssh/id_rsa
         force: false
-        mode: "0600"
+        mode: "{{ permissions_for_ssh_keys }}"
     - name: Write public key for main user
       ansible.builtin.copy:
         content: "{{ github_public_key }}"
-        dest: /home/antonov/.ssh/id_rsa.pub
+        dest: "{{ directory_for_ssh_main_user }}/id_rsa.pub"
+        owner: "{{ username }}"
         force: false
-        mode: "0600"
-    - name: Write public key for ansible user
+        group: "{{ username }}"
+        mode: "{{ permissions_for_ssh_keys }}"
+    - name: Write public key for tech user
+      become: false
       ansible.builtin.copy:
         content: "{{ github_public_key }}"
-        dest: /home/ansible/.ssh/id_rsa.pub
-        owner: antonov
-        group: antonov
+        dest: ~/.ssh/id_rsa.pub
         force: false
-        mode: "0600"
+        mode: "{{ permissions_for_ssh_keys }}"
     - name: Start the ssh-agent
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       ansible.builtin.shell: ssh-agent -s
       args:
         executable: /bin/bash
       register: ssh_agent_output
-
     - name: Extract SSH_AUTH_SOCK from output
       ansible.builtin.set_fact:
         ssh_auth_sock: "{{ ssh_agent_output.stdout_lines | select('search', 'SSH_AUTH_SOCK=') | map('regex_replace', '.*SSH_AUTH_SOCK=([^;]+);.*', '\\1') | first }}"
-
     - name: Add the ssh key to the ssh-agent
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       environment:
         SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
       ansible.builtin.expect:
-        command: ssh-add /home/antonov/.ssh/id_rsa
+        command: ssh-add {{ directory_for_ssh_main_user }}/id_rsa
         responses:
-          Enter passphrase for /home/antonov/.ssh/id_rsa: "{{ github_password_from_key }}"
-
+          "Enter passphrase for .*id_rsa: $": "{{ github_password_from_key }}"
     - name: "Git editor"
       community.general.git_config:
         name: core.editor
         scope: system
         value: "vim"
-
     - name: "Git email"
       community.general.git_config:
         name: user.email
         scope: system
-        value: "antonov.buscorr@gmail.com"
-
+        value: "{{ git_email }}"
     - name: "Git user name"
       community.general.git_config:
         name: user.name
         scope: system
-        value: "Dmitrii_Antonov"
-
-    - name: Git checkout it-notes # noqa: latest
+        value: "{{ git_user }}"
+    - name: Git checkout notes
       environment:
         SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       ansible.builtin.git:
-        repo: git@github.com:antonovdmitriy/it-notes.git
-        dest: /home/antonov/NOTES/it-notes
+        repo: "{{ github_path }}/{{ item }}.git"
+        dest: "{{ directory_for_notes }}/{{ item }}"
         accept_hostkey: true
-
-    - name: Git checkout code # noqa: latest
+      with_items: "{{ notes_repositories_to_clone }}"
+    - name: Git checkout code
       environment:
         SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       ansible.builtin.git:
-        repo: git@github.com:antonovdmitriy/{{ item }}.git
-        dest: /home/antonov/CODE/{{ item }}
+        repo: "{{ github_path }}/{{ item }}.git"
+        dest: "{{ directory_for_code }}/{{ item }}"
         accept_hostkey: true
-      with_items:
-        - learning-aws-lambda
-        - learning-aws-lambda-springboot
-        - sandbox-linux
-        - bridle
-        - earthquake
+      with_items: "{{ repositories_to_clone }}"
     - name: Stop the ssh-agent
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       ansible.builtin.shell: "pkill ssh-agent"
-
     - name: Ensure boto and boto3 modules are installed
       ansible.builtin.pip:
         name: ["boto3", "botocore"]
-
     - name: Download oracle sql developer distributive from s3
       amazon.aws.aws_s3:
         bucket: "{{ bucket_name_for_sql_developer_dist }}"
         aws_access_key: "{{ aws_access_key_id }}"
         aws_secret_key: "{{ aws_secret_access_key }}"
         object: "{{ sql_developer_distr_filename }}"
-        dest: /opt/oracle-sql-developer.zip
+        dest: "{{ oracle_sql_developer_archive }}"
         mode: get
         overwrite: "False"
-
-    - name: Extract oracle sql developer zip
+    - name: Extract oracle sql developer archive
       ansible.builtin.unarchive:
-        src: /opt/oracle-sql-developer.zip
-        creates: /opt/sqldeveloper
-        dest: /opt/
-        owner: antonov
-        group: antonov
-
+        src: "{{ oracle_sql_developer_archive }}"
+        creates: "{{ oracle_sql_developer_directory }}/sqldeveloper"
+        dest: "{{ oracle_sql_developer_directory }}/"
+        owner: "{{ username }}"
+        group: "{{ username }}"
     - name: Check fact that oracle sql developer has been launched before
       ansible.builtin.stat:
-        path: /home/antonov/.sqldeveloper
+        path: "{{ home }}/.sqldeveloper"
       register: stat_about_sqldeveloper_user_directory
-
     - name: First start oracle sql developer to write settings to home directory
       when: not stat_about_sqldeveloper_user_directory.stat.exists
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
-      ansible.builtin.shell: timeout 15 sh /opt/sqldeveloper/sqldeveloper.sh
+      ansible.builtin.shell: timeout 15 sh {{ oracle_sql_developer_directory }}/sqldeveloper/sqldeveloper.sh
       args:
-        executable: /bin/bash
+        executable: "{{ user_shell }}"
       register: timeout_cmd
       failed_when: timeout_cmd.rc != 124
-
     - name: Delete oracle sql developer cache after interrupted start
       when: not stat_about_sqldeveloper_user_directory.stat.exists
       ansible.builtin.file:
         state: absent
-        path: /home/antonov/.sqldeveloper/system22.2.1.234.1810/system_cache
-
+        path: "{{ oracle_sql_developer_system_cache_directory }}"
     - name: Change font size for oracle sql developer
-      become_user: antonov
+      become_user: "{{ username }}"
       become: true
       ansible.builtin.lineinfile:
-        dest: /home/antonov/.sqldeveloper/system22.2.1.234.1810/o.sqldeveloper/ide.properties
+        dest: "{{ oracle_sql_developer_ide_setting_file }}"
         state: present
-        regexp: =18
-        line: Ide.FontSize.en=18
-
+        regexp: "={{ oracle_sql_developer_font_size }}"
+        line: "Ide.FontSize.en={{ oracle_sql_developer_font_size }}"
     - name: Add oracle sql developer to favorites
       ansible.builtin.blockinfile:
-        path: /usr/share/applications/sqldeveloper.desktop
+        path: "{{ oracle_sql_developer_favorites_file }}"
         mode: "755"
         create: true
         block: |
@@ -231,7 +245,7 @@ TODO: start work here
           Version=1.0
           Type=Application
           Terminal=false
-          Exec=/opt/sqldeveloper/sqldeveloper.sh
+          Exec={{ oracle_sql_developer_directory }}/sqldeveloper/sqldeveloper.sh
           Name=Oracle Sql Developer
           Comment=app for sql browsing
-          Icon=/opt/sqldeveloper/icon.png
+          Icon={{ oracle_sql_developer_directory }}/sqldeveloper/icon.png
