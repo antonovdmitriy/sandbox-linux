@@ -1,0 +1,9 @@
+---
+- name: Mount VM Ware shared folder
+  when: ansible_facts['virtualization_type'] == 'VMware'
+  ansible.posix.mount:
+    path: "{{ shared_folder_path }}"
+    src: vmhgfs-fuse
+    fstype: fuse
+    opts: defaults,allow_other
+    state: present

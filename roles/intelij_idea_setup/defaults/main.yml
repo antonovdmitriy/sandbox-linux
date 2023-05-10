@@ -1,0 +1,7 @@
+---
+snap_packages_to_install:
+  - intellij-idea-community
+intelij_directory: "/snap/intellij-idea-community/current"
+file_with_plugin_directory_info: "{{ intelij_directory }}/product-info.json"
+plugins_to_install:
+  - { id: "Docker", folder_to_check: "clouds-docker-impl" }

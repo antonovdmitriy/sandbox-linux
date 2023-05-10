@@ -1,0 +1,29 @@
+---
+- name: Install snap packages
+  community.general.snap:
+    name: "{{ snap_packages_to_install }}"
+    classic: true
+- name: Read intelij idea info file
+  ansible.builtin.shell: "cat {{ file_with_plugin_directory_info }}"
+  register: intelij_info_output
+- name: Save the intelij_info_output as json object
+  ansible.builtin.set_fact:
+    intelij_info_json: "{{ intelij_info_output.stdout | from_json }}"
+- name: Read intelij folder name for plugins from intelij_info_json
+  ansible.builtin.set_fact:
+    intelij_directory_name_for_plugins: "{{ intelij_info_json | json_query('dataDirectoryName') }}"
+  # Install intelij idea plugins
+  # First check a directory that only exists if plugin already had been installed and intelij had been launched after that
+  # Second check an archive that downloaded after install plugin command invoked but intelij idea had not been started yet. It can be possible
+  # In the end true to exit as installPlugins exits with no 0 code 
+- name: Install intelij idea plugins
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.shell: >
+    [ -d {{ home }}/.local/share/JetBrains/{{ intelij_directory_name_for_plugins }}/{{ item.folder_to_check }} ]
+    || [ -f {{ home }}/.cache/JetBrains/{{ intelij_directory_name_for_plugins }}/plugins/{{ item.folder_to_check }}.zip ]
+    || {{ intelij_directory }}/bin/idea.sh installPlugins {{ item.id }}
+    || echo true      
+  args:
+    executable: "{{ user_shell }}"
+  loop: "{{ plugins_to_install }}"

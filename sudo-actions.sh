@@ -30,6 +30,10 @@ change gnome terminal font size
 cp "$1" /home/ansible/start_playbook.yml
 ## change owner to ansible
 chown ansible:ansible /home/ansible/start_playbook.yml
+# copy roles directory from source directory to ansible home directory
+cp -R ./roles/ /home/ansible/roles
+# change owner to ansible for roles directory and its contents
+chown -R ansible:ansible /home/ansible/roles
 ## run start playbok as ansible user
 sudo -u ansible -H sh -c "cd ~; ansible-playbook start_playbook.yml -vv -e @/mnt/hgfs/secrets/secret.yml --ask-vault-pass"
 ## delete technical ansible user

@@ -1,0 +1,15 @@
+---
+# packages
+packages_to_install:
+  - vim
+  - tree
+  - mc
+  - git
+  - maven
+  - gradle
+  - docker.io
+  - docker-compose
+  - openjdk-17-jdk
+  - python3-pip
+snap_packages_to_install:
+  - code
