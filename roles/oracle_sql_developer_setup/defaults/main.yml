@@ -9,5 +9,5 @@ oracle_sql_developer_system_cache_directory: "{{ oracle_sql_developer_user_setti
 oracle_sql_developer_ide_setting_file: "{{ oracle_sql_developer_user_settings_directory }}/o.sqldeveloper/ide.properties"
 oracle_sql_developer_font_size: "18"
 oracle_sql_developer_favorites_file: "/usr/share/applications/sqldeveloper.desktop"
-directories_to_create:
+directories_to_create_for_oracle_sql_developer:
   - "{{ oracle_sql_developer_directory }}"
