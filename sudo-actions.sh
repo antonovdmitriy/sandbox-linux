@@ -2,7 +2,6 @@
 
 # Define log levels
 INFO="\033[1;34mINFO:\033[0m"
-WARN="\033[1;33mWARNING:\033[0m"
 ERROR="\033[1;31mERROR:\033[0m"
 
 if [ -z "$1" ]; then echo -e "$ERROR First argument (playbook path) is empty" >&2; exit 1; fi

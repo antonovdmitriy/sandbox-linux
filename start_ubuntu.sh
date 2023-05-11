@@ -84,7 +84,7 @@ scala)
 esac
 
 echo -e "$INFO Starting sudo actions with playbook: $playbook_to_start and secrets file: $secrets_file"
-sudo ./sudo-actions.sh $playbook_to_start $secrets_file $verbose
+sudo ./sudo-actions.sh "$playbook_to_start" "$secrets_file" "$verbose"
 
 # End timer
 end=$(date +%s)
