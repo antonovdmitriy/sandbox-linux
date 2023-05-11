@@ -1,21 +1,18 @@
 #!/bin/bash
 
-ls -l
-
 if [ -z "$1" ]; then echo "$1" argument for playbook is empty >&2; exit 1; fi
 if [ ! -f "$1" ]; then echo "$1" playbook does not exist >&2; exit 2; fi
 
-## create technical ansible user
+# create technical ansible user
 useradd  -m ansible -s /bin/bash
-## grant ansible user get sudo without password
+# grant ansible user get sudo without password
 echo "ansible ALL=(ALL) NOPASSWD:ALL" | tee -a /etc/sudoers
-# ## update repositories and system packages
-# add rights to read from shared folder in virtual box
-# usermod -aG vboxsf ansible
+# update repositories and system packages
 apt update
 apt -y upgrade
-apt autoremove
-apt autoclean
+# clean old packages and journal
+apt -y autoremove
+apt -y autoclean
 journalctl --vacuum-time=1d
 ## install ansible
 apt -y install ansible
@@ -33,8 +30,12 @@ change gnome terminal font size
 cp "$1" /home/ansible/start_playbook.yml
 ## change owner to ansible
 chown ansible:ansible /home/ansible/start_playbook.yml
+# copy roles directory from source directory to ansible home directory
+cp -R ./roles/ /home/ansible/roles
+# change owner to ansible for roles directory and its contents
+chown -R ansible:ansible /home/ansible/roles
 ## run start playbok as ansible user
 sudo -u ansible -H sh -c "cd ~; ansible-playbook start_playbook.yml -vv -e @/mnt/hgfs/secrets/secret.yml --ask-vault-pass"
-## delete technocal ansible user
+## delete technical ansible user
 userdel -r ansible
 sed -i '/ansible/d' /etc/sudoers

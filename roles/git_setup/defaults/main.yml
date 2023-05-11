@@ -1,0 +1,17 @@
+---
+directories_to_create:
+  - "{{ directory_for_ssh_main_user }}"
+  - "{{ directory_for_code }}"
+  - "{{ directory_for_notes }}"
+  - "{{ directory_for_notes }}/it-notes"
+directory_for_code: "{{ home }}/CODE"
+directory_for_notes: "{{ home }}/NOTES"
+directory_for_ssh_main_user: "{{ home }}/.ssh"
+temp_directories_to_create:
+  - ~/.ssh  
+permissions_for_ssh_keys: "0600"
+git_email: "antonov.buscorr@gmail.com"
+git_user: "Dmitrii_Antonov"
+github_path: "git@github.com:antonovdmitriy"
+notes_repositories_to_clone:
+  - it-notes

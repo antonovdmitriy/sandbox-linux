@@ -1,0 +1,69 @@
+---   
+- name: Ensure boto and boto3 modules are installed
+  ansible.builtin.pip:
+    name: ["boto3", "botocore"]
+- name: Create directory if it does not exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "755"
+    state: directory
+  loop: "{{ directories_to_create }}"    
+- name: Download oracle sql developer distributive from s3
+  amazon.aws.aws_s3:
+    bucket: "{{ bucket_name_for_sql_developer_dist }}"
+    aws_access_key: "{{ aws_access_key_id }}"
+    aws_secret_key: "{{ aws_secret_access_key }}"
+    object: "{{ sql_developer_distr_filename }}"
+    dest: "{{ oracle_sql_developer_archive }}"
+    mode: get
+    overwrite: "False"
+- name: Extract oracle sql developer archive
+  ansible.builtin.unarchive:
+    src: "{{ oracle_sql_developer_archive }}"
+    creates: "{{ oracle_sql_developer_directory }}/sqldeveloper"
+    dest: "{{ oracle_sql_developer_directory }}/"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+- name: Check fact that oracle sql developer has been launched before
+  ansible.builtin.stat:
+    path: "{{ home }}/.sqldeveloper"
+  register: stat_about_sqldeveloper_user_directory
+- name: First start oracle sql developer to write settings to home directory
+  when: not stat_about_sqldeveloper_user_directory.stat.exists
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.shell: timeout 15 sh {{ oracle_sql_developer_directory }}/sqldeveloper/sqldeveloper.sh
+  args:
+    executable: "{{ user_shell }}"
+  register: timeout_cmd
+  failed_when: timeout_cmd.rc != 124
+- name: Delete oracle sql developer cache after interrupted start
+  when: not stat_about_sqldeveloper_user_directory.stat.exists
+  ansible.builtin.file:
+    state: absent
+    path: "{{ oracle_sql_developer_system_cache_directory }}"
+- name: Change font size for oracle sql developer
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.lineinfile:
+    dest: "{{ oracle_sql_developer_ide_setting_file }}"
+    state: present
+    regexp: "={{ oracle_sql_developer_font_size }}"
+    line: "Ide.FontSize.en={{ oracle_sql_developer_font_size }}"
+- name: Add oracle sql developer to favorites
+  ansible.builtin.blockinfile:
+    path: "{{ oracle_sql_developer_favorites_file }}"
+    mode: "755"
+    create: true
+    block: |
+      #!/usr/bin/env xdg-open
+      [Desktop Entry]
+      Version=1.0
+      Type=Application
+      Terminal=false
+      Exec={{ oracle_sql_developer_directory }}/sqldeveloper/sqldeveloper.sh
+      Name=Oracle Sql Developer
+      Comment=app for sql browsing
+      Icon={{ oracle_sql_developer_directory }}/sqldeveloper/icon.png

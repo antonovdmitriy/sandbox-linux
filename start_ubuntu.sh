@@ -1,9 +1,10 @@
 #!/bin/bash
 
-set -x
-
 # File name
 PROGNAME=$(basename "$0")
+environment=java
+java_playbook=./start_playbook_java.yml
+scala_playbook=./start_playbook_scala.yml
 
 usage() {
 	echo "Script for prepare linux enviromment for development"
@@ -22,10 +23,6 @@ usage() {
 	echo "      Do not interpret any more arguments as options."
 	echo
 }
-
-environment=java
-java_playbook=./start_playbook.yml
-scala_playbook=./start_playbook_scala.yml
 
 
 while [ "$#" -gt 0 ]
@@ -64,10 +61,4 @@ scala)
   ;;
 esac
 
-
-# change graphics settings
-# ./change-graphics-settings.sh
-# run sudo tasks
 sudo ./sudo-actions.sh $playbook_to_start
-
-set +x

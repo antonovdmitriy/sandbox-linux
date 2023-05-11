@@ -1,0 +1,28 @@
+---
+- name: Add main user
+  ansible.builtin.user:
+    name: "{{ username }}"
+    shell: "{{ user_shell }}"
+
+- name: Merge lists
+  ansible.builtin.set_fact:
+    packages_to_install: "{{ packages_to_install | default([]) | union(additional_packages | default([])) }}"
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ packages_to_install }}"
+    state: present
+  ## It will be applied only after after new session log in. Unfortunately..
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ username }}"
+    append: yes
+    groups: docker
+- name: Ensure Docker service is restarted
+  ansible.builtin.systemd:
+    name: docker.service
+    state: restarted
+    enabled: yes    
+- name: Install snap packages
+  community.general.snap:
+    name: "{{ snap_packages_to_install }}"
+    classic: true

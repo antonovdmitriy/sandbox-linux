@@ -1,0 +1,13 @@
+---
+bucket_name_for_sql_developer_dist: sql-developer-for-personal-use
+sql_developer_distr_filename: sqldeveloper-22.2.1.234.1810-no-jre.zip
+directory_for_apps: "/opt"
+oracle_sql_developer_directory: "{{ directory_for_apps }}/oracle-sql-developer"
+oracle_sql_developer_archive: "{{ directory_for_apps }}/oracle-sql-developer.zip"
+oracle_sql_developer_user_settings_directory: "{{ home }}/.sqldeveloper/system22.2.1.234.1810"
+oracle_sql_developer_system_cache_directory: "{{ oracle_sql_developer_user_settings_directory }}/system_cache"
+oracle_sql_developer_ide_setting_file: "{{ oracle_sql_developer_user_settings_directory }}/o.sqldeveloper/ide.properties"
+oracle_sql_developer_font_size: "18"
+oracle_sql_developer_favorites_file: "/usr/share/applications/sqldeveloper.desktop"
+directories_to_create:
+  - "{{ oracle_sql_developer_directory }}"
