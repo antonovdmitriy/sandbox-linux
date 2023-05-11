@@ -80,7 +80,7 @@
     name: user.name
     scope: system
     value: "{{ git_user }}"
-- name: Git checkout notes
+- name: Git checkout notes # noqa: latest
   environment:
     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
   become_user: "{{ username }}"
@@ -93,7 +93,7 @@
 - name: Merge lists for additional code repositories
   ansible.builtin.set_fact:
     repositories_to_clone: "{{ repositories_to_clone | default([]) | union(additional_repositories | default([])) }}"  
-- name: Git checkout code
+- name: Git checkout code # noqa: latest
   environment:
     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
   become_user: "{{ username }}"
