@@ -5,7 +5,6 @@ start=$(date +%s)
 
 # Define log levels
 INFO="\033[1;34mINFO:\033[0m"
-WARN="\033[1;33mWARNING:\033[0m"
 ERROR="\033[1;31mERROR:\033[0m"
 
 # File name
