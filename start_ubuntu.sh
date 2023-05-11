@@ -5,6 +5,7 @@ PROGNAME=$(basename "$0")
 environment=java
 java_playbook=./start_playbook_java.yml
 scala_playbook=./start_playbook_scala.yml
+secrets_file=/mnt/hgfs/secrets/secret.yml
 
 usage() {
 	echo "Script for prepare linux enviromment for development"
@@ -19,11 +20,13 @@ usage() {
 	echo "  -e <environemt>, --environment <environment>"
 	echo "      Possible environment: java, scala. Java is default"
 	echo
+	echo "  -s <secrets>, --secrets <secrets>"
+	echo "      Path to secrets file. Default is /mnt/hgfs/secrets/secret.yml"
+	echo
 	echo "  --"
 	echo "      Do not interpret any more arguments as options."
 	echo
 }
-
 
 while [ "$#" -gt 0 ]
 do
@@ -34,6 +37,10 @@ do
 		;;
 	-e|--environment)
 		environment="$2"
+		shift
+		;;
+	-s|--secrets)
+		secrets_file="$2"
 		shift
 		;;
 	--)
@@ -48,7 +55,6 @@ do
 	shift
 done
 
-
 case $environment in
 java)
   playbook_to_start=$java_playbook
@@ -61,4 +67,4 @@ scala)
   ;;
 esac
 
-sudo ./sudo-actions.sh $playbook_to_start
+sudo ./sudo-actions.sh $playbook_to_start $secrets_file
