@@ -6,7 +6,7 @@
     state: directory
   loop: "{{ temp_directories_to_create }}"
 - name: Merge lists for additional directories
-  set_fact:
+  ansible.builtin.set_fact:
     directories_to_create: "{{ directories_to_create | default([]) | union(additional_directories | default([])) }}"  
 - name: Create directory if it does not exist
   ansible.builtin.file:
@@ -91,7 +91,7 @@
     accept_hostkey: true
   with_items: "{{ notes_repositories_to_clone }}"
 - name: Merge lists for additional code repositories
-  set_fact:
+  ansible.builtin.set_fact:
     repositories_to_clone: "{{ repositories_to_clone | default([]) | union(additional_repositories | default([])) }}"  
 - name: Git checkout code
   environment:

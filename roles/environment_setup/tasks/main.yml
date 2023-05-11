@@ -5,7 +5,7 @@
     shell: "{{ user_shell }}"
 
 - name: Merge lists
-  set_fact:
+  ansible.builtin.set_fact:
     packages_to_install: "{{ packages_to_install | default([]) | union(additional_packages | default([])) }}"
 - name: Install packages
   ansible.builtin.package:
