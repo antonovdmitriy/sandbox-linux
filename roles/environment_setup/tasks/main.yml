@@ -4,7 +4,7 @@
     name: "{{ username }}"
     shell: "{{ user_shell }}"
 
-- name: Merge lists
+- name: Prepare list of packages to install
   ansible.builtin.set_fact:
     packages_to_install: "{{ packages_to_install | default([]) | union(additional_packages | default([])) }}"
 - name: Install packages
@@ -26,3 +26,4 @@
   community.general.snap:
     name: "{{ snap_packages_to_install }}"
     classic: true
+    
