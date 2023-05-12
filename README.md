@@ -22,7 +22,7 @@ This repository contains a set of scripts and Ansible playbooks that automate th
 - `sudo-actions.sh`: This helper script prepares the environment for the Ansible playbooks. It installs Ansible and then triggers the execution of the appropriate playbook based on the arguments passed to it.
 
 - `roles/`: This directory contains Ansible roles, each of which carries out a specific task or set of tasks in the setup process.
-  - `environment_setup`: This role creates the main development user, installs specified packages, adds the user to the Docker group, starts the Docker daemon, and installs programs from the Snap repository.
+    - `environment_setup`: This role creates the main development user, installs specified packages, adds the user to the Docker group, starts the Docker daemon, and installs programs from the Snap repository.
   - `intelij_idea_setup`: This role installs the community version of IntelliJ IDEA and any specified plugins.
   - `git_setup`: This role configures Git, retrieves keys for accessing the Git repository from an Ansible vault, and clones the specified repositories.
   - `oracle_sql_developer_setup`: This role installs Oracle SQL Developer and configures the font size. It's included as a demonstration and not intended for commercial use. The distributive is downloaded from an AWS S3 bucket.
