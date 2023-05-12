@@ -17,9 +17,9 @@ By leveraging `sandbox-linux`, developers can save valuable time and focus more 
 
 This repository contains a set of scripts and Ansible playbooks that automate the process of setting up a development environment on an Ubuntu system. Here's an overview of the key components:
 
-  - `start_ubuntu.sh`: This is the primary script you'll run to set up your development environment. It configures the Ubuntu environment based on the provided arguments.
+- `start_ubuntu.sh`: This is the primary script you'll run to set up your development environment. It configures the Ubuntu environment based on the provided arguments.
 
-  - `sudo-actions.sh`: This helper script prepares the environment for the Ansible playbooks. It installs Ansible and then triggers the execution of the appropriate playbook based on the arguments passed to it.
+- `sudo-actions.sh`: This helper script prepares the environment for the Ansible playbooks. It installs Ansible and then triggers the execution of the appropriate playbook based on the arguments passed to it.
 
   - `roles/`: This directory contains Ansible roles, each of which carries out a specific task or set of tasks in the setup process.
 
