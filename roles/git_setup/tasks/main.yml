@@ -5,17 +5,35 @@
     path: "{{ item }}"
     state: directory
   loop: "{{ temp_directories_to_create }}"
-- name: Merge lists for additional directories
+- name: Merge lists for additional code repositories
   ansible.builtin.set_fact:
-    directories_to_create: "{{ directories_to_create | default([]) | union(additional_directories | default([])) }}"  
-- name: Create directory if it does not exist
+    repositories_to_clone: "{{ repositories_to_clone | default([]) | union(additional_repositories | default([])) }}"  
+- name: Create base directories for notes and code if it does not exist
   ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ username }}"
     group: "{{ username }}"
     mode: "755"
     state: directory
-  loop: "{{ directories_to_create }}"
+  loop: 
+  - "{{ directory_for_code }}"
+  - "{{ directory_for_notes }}"
+- name: Create directories for code if it does not exist
+  ansible.builtin.file:
+    path: "{{ directory_for_code }}/{{ item }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "755"
+    state: directory
+  loop: "{{ repositories_to_clone }}"
+- name: Create directories for notes if it does not exist
+  ansible.builtin.file:
+    path: "{{ directory_for_notes }}/{{ item }}"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "755"
+    state: directory
+  loop: "{{ notes_repositories_to_clone }}"
 - name: Write private key for main user
   ansible.builtin.copy:
     content: "{{ github_private_key }}"
@@ -89,10 +107,7 @@
     repo: "{{ github_path }}/{{ item }}.git"
     dest: "{{ directory_for_notes }}/{{ item }}"
     accept_hostkey: true
-  with_items: "{{ notes_repositories_to_clone }}"
-- name: Merge lists for additional code repositories
-  ansible.builtin.set_fact:
-    repositories_to_clone: "{{ repositories_to_clone | default([]) | union(additional_repositories | default([])) }}"  
+  with_items: "{{ notes_repositories_to_clone }}"  
 - name: Git checkout code # noqa: latest
   environment:
     SSH_AUTH_SOCK: "{{ ssh_auth_sock }}"
