@@ -18,10 +18,7 @@
           - { id: "org.intellij.scala", folder_to_check: "Scala" }
     - role: git_setup
       vars:
-        additional_directories:
-          - "{{ directory_for_code }}/Learning"
-          - "{{ directory_for_code }}/crud-wishlist-scala-sqlite"
         additional_repositories:
-          - Learning          
+          - Learning
           - crud-wishlist-scala-sqlite
     - oracle_sql_developer_setup

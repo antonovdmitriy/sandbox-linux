@@ -3,7 +3,6 @@ directories_to_create:
   - "{{ directory_for_ssh_main_user }}"
   - "{{ directory_for_code }}"
   - "{{ directory_for_notes }}"
-  - "{{ directory_for_notes }}/it-notes"
 directory_for_code: "{{ home }}/CODE"
 directory_for_notes: "{{ home }}/NOTES"
 directory_for_ssh_main_user: "{{ home }}/.ssh"
