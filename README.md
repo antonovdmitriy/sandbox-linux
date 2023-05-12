@@ -34,13 +34,9 @@ By separating these tasks into distinct roles and playbooks, the repository prov
 The setup scripts make use of secrets stored in an Ansible vault file. This secure file is used to store sensitive information needed for the scripts to operate, such as certificates for accessing Git repositories and credentials for accessing external storage systems such as AWS S3. Here's what you need to know about the keys used:
 
 - `github_private_key`: This is the private key used to authenticate with your GitHub repository. It enables the script to securely clone your repositories.
-
 - `github_public_key`: This is the public key that pairs with your private key for GitHub repository a-ccess. It's used to authenticate your identity when the scripts interact with your repositories.
-
 - `github_password_from_key`: If your private key is passphrase protected, provide that passphrase here to allow the scripts to unlock the key and use it for repository access.
-
 - `aws_access_key_id`: This is your AWS access key ID. It's used to authenticate with AWS services, specifically to download distributives from your S3 bucket that are not available for installation from package repositories or snap.
-
 - `aws_secret_access_key`: This is your AWS secret access key, which pairs with the `aws_access_key_id` to authenticate your AWS account.
 
 Remember to keep your Ansible vault file secure, as it contains sensitive information. The file should be kept out of version control systems and access should be restricted to those who need it.
