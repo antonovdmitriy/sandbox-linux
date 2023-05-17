@@ -3,6 +3,7 @@
 packages_to_install:
   - vim
   - tree
+  - curl
   - mc
   - git
   - docker.io
