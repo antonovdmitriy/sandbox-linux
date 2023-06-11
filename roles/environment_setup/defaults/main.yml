@@ -9,6 +9,7 @@ packages_to_install:
   - docker.io
   - docker-compose
   - openjdk-17-jdk
+  - openjdk-17-source
   - python3-pip
 snap_packages_to_install:
   - code
