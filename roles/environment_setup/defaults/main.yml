@@ -11,5 +11,7 @@ packages_to_install:
   - openjdk-17-jdk
   - openjdk-17-source
   - python3-pip
+  - net-tools
+  - httpie
 snap_packages_to_install:
   - code
