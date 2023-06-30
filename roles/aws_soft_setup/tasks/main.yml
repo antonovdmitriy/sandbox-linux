@@ -1,0 +1,44 @@
+---
+
+- name: Check if AWS CLI is already installed
+  ansible.builtin.command: aws --version
+  register: awscli_check
+  failed_when: false
+  changed_when: false
+
+- name: Copy AWS CLI installation script
+  ansible.builtin.copy:
+    src: install_awscli.sh
+    dest: /tmp/install_awscli.sh
+    mode: 0755
+  when: awscli_check.rc != 0
+
+- name: Execute AWS CLI installation script
+  ansible.builtin.command: /tmp/install_awscli.sh
+  when: awscli_check.rc != 0
+
+- name: Check if AWS CLI is already configured
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.command: aws configure get aws_access_key_id
+  register: awscli_config_check
+  changed_when: false
+  failed_when: false
+
+- name: Set AWS access key ID
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.command: aws configure set aws_access_key_id {{ aws_access_key_id }}
+  when: awscli_config_check.stdout == ""
+
+- name: Set AWS secret access key
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.command: aws configure set aws_secret_access_key {{ aws_secret_access_key }}
+  when: awscli_config_check.stdout == ""
+
+- name: Set AWS region
+  become_user: "{{ username }}"
+  become: true
+  ansible.builtin.command: aws configure set region {{ aws_region }}
+  when: awscli_config_check.stdout == ""
