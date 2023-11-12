@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local
   vars:
-    username: antonov
+    username: dmitrii
     user_shell: /bin/bash
     home: "/home/{{ username }}"
   roles:
